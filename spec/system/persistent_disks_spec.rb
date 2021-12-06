@@ -1,6 +1,6 @@
 require 'system/spec_helper'
 
-describe 'persistent disks', core: true do
+xdescribe 'persistent disks', core: true do
   before(:all) do
     @requirements.requirement(@requirements.stemcell)
     @requirements.requirement(@requirements.release)
@@ -14,6 +14,26 @@ describe 'persistent disks', core: true do
 
   after(:each) do
     @requirements.cleanup(deployment)
+  end
+
+  context 'with multiple disks' do
+    disk1_size_mb = 5 * 1024
+    disk2_size_mb = 4 * 1024
+
+    before(:each) do
+      use_multiple_persistent_disks(disk1_size_mb, disk2_size_mb)
+      @requirements.requirement(deployment, @spec)
+    end
+
+    it 'attaches multiple disks', ssh: true do
+      disk1_bytes = disk1_size_mb * 1024 * 1024
+      disk2_bytes = disk2_size_mb * 1024 * 1024
+
+      output = bosh_ssh('batlight', 0, "lsblk -b", deployment: deployment.name).output
+
+      expect(output).to include(disk1_bytes.to_s)
+      expect(output).to include(disk2_bytes.to_s)
+    end
   end
 
   context 'with an orphaned disk' do
