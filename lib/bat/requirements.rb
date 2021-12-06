@@ -105,7 +105,7 @@ module Bat
       if @bosh_runner.deployments.include?(what.name) && !options[:force]
         @logger.info('deployment already deployed, skipping deployment')
       else
-        update_cloud_config(deployment_spec)
+        #update_cloud_config(deployment_spec)
         @logger.info('deployment not already deployed, deploying...')
         what.generate_deployment_manifest(deployment_spec)
         x = @bosh_runner.bosh_safe("-d #{what.name} deploy #{what.to_path} #{options[:bosh_params]}")
