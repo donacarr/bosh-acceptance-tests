@@ -67,45 +67,7 @@ describe 'with release and stemcell and subsequent deployments' do
       Hash[matchdata.names.zip(matchdata.captures)]
     end
   end
-
-  xcontext 'with persistent disk size changing' do
-    SAVE_FILE = '/var/vcap/store/batarang/save'
-
-    before(:all) do
-      reload_deployment_spec
-      use_static_ip
-      use_vip
-      @jobs = %w[
-        /var/vcap/packages/batlight/bin/batlight
-        /var/vcap/packages/batarang/bin/batarang
-      ]
-      use_instance_group('colocated')
-      use_jobs(%w[batarang batlight])
-      use_persistent_disk(2048)
-
-      @requirements.requirement(deployment, @spec)
-
-      bosh_ssh('colocated', 0, "sudo sh -c \"echo 'foobar' > #{SAVE_FILE}\"", deployment: deployment.name)
-      unless warden?
-        @size = persistent_disk('colocated', 0, deployment: deployment)
-        use_persistent_disk(4096)
-      end
-      @requirements.requirement(deployment, @spec, force: true)
-    end
-
-    after(:all) do
-      @requirements.cleanup(deployment)
-    end
-
-    it 'should migrate disk contents', ssh: true do
-      # Warden df don't work so skip the persistent disk size check
-      unless warden?
-        expect(persistent_disk('colocated', 0, deployment: deployment)).to_not eq(@size)
-      end
-      expect(bosh_ssh('colocated', 0, "sudo cat #{SAVE_FILE}", deployment: deployment.name).output).to match /foobar/
-    end
-  end
-
+  
   describe 'general stemcell configuration' do
     before(:all) do
       reload_deployment_spec
