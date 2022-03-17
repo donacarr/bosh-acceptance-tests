@@ -81,14 +81,14 @@ describe 'with release and stemcell and subsequent deployments' do
       ]
       use_instance_group('colocated')
       use_jobs(%w[batarang batlight])
-      use_persistent_disk(2048)
+      use_persistent_disk(20480)
 
       @requirements.requirement(deployment, @spec)
 
       bosh_ssh('colocated', 0, "sudo sh -c \"echo 'foobar' > #{SAVE_FILE}\"", deployment: deployment.name)
       unless warden?
         @size = persistent_disk('colocated', 0, deployment: deployment)
-        use_persistent_disk(4096)
+        use_persistent_disk(40960)
       end
       @requirements.requirement(deployment, @spec, force: true)
     end
